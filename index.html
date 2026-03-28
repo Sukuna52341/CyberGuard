@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberGuard Quiz - Cybersecurity Awareness Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="screen active">
+            <div class="welcome-content">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <h1>CyberGuard Quiz</h1>
+                </div>
+                <p class="subtitle">Test your cybersecurity knowledge and become a digital defender!</p>
+
+                <div class="welcome-options">
+                    <div class="option-block">
+                        <h3 class="option-block-title"><i class="fas fa-layer-group"></i> Difficulty</h3>
+                        <div class="segmented-control" id="difficulty-select" role="group" aria-label="Difficulty">
+                            <button type="button" class="segment active" data-difficulty="mixed" title="Mix of all levels">Mixed</button>
+                            <button type="button" class="segment" data-difficulty="easy" title="Foundations">Easy</button>
+                            <button type="button" class="segment" data-difficulty="medium" title="Everyday security">Medium</button>
+                            <button type="button" class="segment" data-difficulty="hard" title="Tricky scenarios">Hard</button>
+                        </div>
+                    </div>
+                    <div class="option-block">
+                        <h3 class="option-block-title"><i class="fas fa-gamepad"></i> Mode</h3>
+                        <div class="segmented-control" id="mode-select" role="group" aria-label="Quiz mode">
+                            <button type="button" class="segment active" data-mode="standard">Standard</button>
+                            <button type="button" class="segment" data-mode="timed" title="30 seconds per question">Timed</button>
+                            <button type="button" class="segment" data-mode="multiplayer" title="Same quiz, two players">2-Player</button>
+                        </div>
+                    </div>
+                    <div class="achievements-entry">
+                        <button type="button" id="open-achievements-btn" class="btn btn-outline btn-small"><i class="fas fa-medal"></i> Achievements</button>
+                    </div>
+                </div>
+                
+                <div class="category-selection">
+                    <h2>Choose Your Mission:</h2>
+                    <div class="category-grid">
+                        <div class="category-card" data-category="phishing">
+                            <i class="fas fa-fish"></i>
+                            <h3>Phishing Defense</h3>
+                            <p>Spot the fake emails and protect yourself from scams</p>
+                        </div>
+                        <div class="category-card" data-category="passwords">
+                            <i class="fas fa-key"></i>
+                            <h3>Password Power</h3>
+                            <p>Master the art of creating strong, secure passwords</p>
+                        </div>
+                        <div class="category-card" data-category="threats">
+                            <i class="fas fa-virus-slash"></i>
+                            <h3>Cyber Threats</h3>
+                            <p>Learn about malware, viruses, and online dangers</p>
+                        </div>
+                        <div class="category-card" data-category="social">
+                            <i class="fas fa-user-secret"></i>
+                            <h3>Social Engineering</h3>
+                            <p>Recognize manipulation, vishing, and pressure tactics</p>
+                        </div>
+                        <div class="category-card" data-category="privacy">
+                            <i class="fas fa-user-shield"></i>
+                            <h3>Privacy &amp; Data</h3>
+                            <p>Control your data, cookies, and safe sharing</p>
+                        </div>
+                        <div class="category-card" data-category="browsing">
+                            <i class="fas fa-globe"></i>
+                            <h3>Safe Browsing</h3>
+                            <p>HTTPS, downloads, and staying safe on the web</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="start-quiz" class="btn btn-primary" disabled>Select a category to begin</button>
+            </div>
+        </div>
+
+        <!-- Player handoff (2-player) -->
+        <div id="handoff-screen" class="screen">
+            <div class="handoff-content">
+                <i class="fas fa-users"></i>
+                <h2 id="handoff-title">Player 2 — your turn</h2>
+                <p id="handoff-desc" class="handoff-desc">Same questions and order. No peeking!</p>
+                <button type="button" id="handoff-continue" class="btn btn-primary">Start</button>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="screen">
+            <div class="quiz-header">
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <span class="progress-text">Question <span id="current-question">1</span> of <span id="total-questions">10</span></span>
+                </div>
+                <div class="quiz-header-meta">
+                    <div id="timer-container" class="timer-container hidden" aria-live="polite">
+                        <i class="fas fa-stopwatch"></i>
+                        <span id="timer-display">30</span>s
+                    </div>
+                    <div id="player-badge" class="player-badge hidden"></div>
+                    <div class="score-container">
+                        <i class="fas fa-star"></i>
+                        <span id="score">0</span>
+                        <span class="score-max" id="score-max">/ 100</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-container">
+                <div class="question-card">
+                    <div id="scenario-panel" class="scenario-panel hidden" role="region" aria-label="Scenario">
+                        <span class="scenario-label"><i class="fas fa-map-signs"></i> Scenario</span>
+                        <p id="scenario-text"></p>
+                    </div>
+                    <h2 id="question-text">Loading question...</h2>
+                    <div id="question-options" class="options-grid">
+                        <!-- Options will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="quiz-controls">
+                <button id="next-btn" class="btn btn-secondary" disabled>Next Question</button>
+                <button id="explain-btn" class="btn btn-outline" style="display: none;">Explain Answer</button>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="screen">
+            <div class="results-content">
+                <div class="results-header">
+                    <i class="fas fa-trophy"></i>
+                    <h1>Quiz Complete!</h1>
+                </div>
+                
+                <div class="score-display">
+                    <div class="score-circle">
+                        <span id="final-score">0</span>
+                        <span class="score-label" id="final-score-max">/ 100</span>
+                    </div>
+                    <div class="score-message" id="score-message">
+                        <!-- Score message will be populated -->
+                    </div>
+                </div>
+
+                <div class="results-breakdown">
+                    <h3>Performance Breakdown:</h3>
+                    <div class="breakdown-grid">
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">Correct Answers:</span>
+                            <span id="correct-answers">0</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">Accuracy:</span>
+                            <span id="accuracy">0%</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">Time Taken:</span>
+                            <span id="time-taken">0s</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="multiplayer-results" class="multiplayer-results hidden">
+                    <h3>Head-to-head</h3>
+                    <div class="versus-grid" id="versus-grid"></div>
+                </div>
+
+                <div id="new-achievements" class="new-achievements hidden"></div>
+
+                <div class="action-buttons">
+                    <button id="retry-btn" class="btn btn-primary">Try Again</button>
+                    <button id="new-category-btn" class="btn btn-secondary">New Category</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Achievements Modal -->
+        <div id="achievements-modal" class="modal">
+            <div class="modal-content modal-wide">
+                <div class="modal-header">
+                    <h3>Achievements</h3>
+                    <button type="button" class="close-btn achievements-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="achievements-hint">Progress is saved on this device only.</p>
+                    <div id="achievements-list" class="achievements-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Explanation Modal -->
+        <div id="explanation-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Explanation</h3>
+                    <button type="button" class="close-btn" id="close-explanation-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="explanation-content">
+                        <!-- Explanation content will be populated -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
